@@ -16,8 +16,6 @@ describe('AMM', () => {
       token2,
       amm;
 
-
-
   beforeEach(async () => {
     accounts = await ethers.getSigners()
     deployer = accounts[0]
