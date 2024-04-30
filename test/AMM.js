@@ -250,36 +250,39 @@ describe('AMM', () => {
         // Check Price after swap
         console.log(`Price ${await amm.token2Balance() / await amm.token1Balance()}`)
 
-      })
-      
-      describe('Success', () => {
+        // Removing liquidity
+
+        console.log(`AMM Token1 Balance: ${ethers.utils.formatEther(await amm.token1Balance())}`)
+        console.log(`AMM Token2 Balance: ${ethers.utils.formatEther(await amm.token2Balance())}`)
+
+        // Check LP balance before removing tokens
+        balance = await token1.balanceOf(liqudityProvider.address)
+        console.log(`liqudity Provider token1 balance before removing funds: ${ethers.utils.formatEther(balance)}`)
+
+        balance = await token2.balanceOf(liqudityProvider.address)
+        console.log(`liqudity Provider token2 balance before removing funds: ${ethers.utils.formatEther(balance)}`)
+
+        // LP removes tokens from pool
+        transaction = await amm.connect(liqudityProvider).removeLiquidity(tokens(50)) //50 Shares
+        await transaction.wait()
+
+        // LP check after removing Liquidity
+        balance = await token1.balanceOf(liqudityProvider.address)
+        console.log(`Liquidity Provider Token1 balance after removing funds: ${ethers.utils.formatEther(balance)}`)
+
+        balance = await token2.balanceOf(liqudityProvider.address)
+        console.log(`Liquidity Provider Token2 balance after removing funds: ${ethers.utils.formatEther(balance)}`)
+
+        //LP should have 0 shares
+        expect(await amm.shares(liqudityProvider.address)).to.equal(0)
+
+        // Deployer should have 100 shares
+        expect(await amm.shares(deployer.address)).to.equal(tokens(100))
+
+        // AMM Pool has 100 total shares
+        expect(await amm.totalShares()).to.equal(tokens(100))
 
       })
-
-      describe('Failure', () => {
-
-      })
-
-    })
-
-    describe('Swaping tokens', () => {
-    let amount, transaction, result
-
-    beforeEach(async () => {
-      amount = tokens(100)
-      transaction = await token.connect(deployer).approve(exchange.address, amount)
-      result = await transaction.wait()
-    })
-
-    describe('Success', () => {
-  
-
-    })
-
-    describe('Failure', () => {
-      
-    })
-
 
     })
 
