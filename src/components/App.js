@@ -18,8 +18,7 @@ import {
   loadProvider, 
   loadNetwork, 
   loadTokens,
-  loadAMM,
-  loadBalances
+  loadAMM
 } from '../Store/interactions'
 
 function App() {
@@ -29,7 +28,6 @@ function App() {
   const loadBlockchainData = async () => {
     // Initiate provider
     const provider = await loadProvider(dispatch);
-
     const chainId = await loadNetwork(provider, dispatch)
 
     // Reload page when network changes
@@ -39,14 +37,11 @@ function App() {
 
     // Fetch Accounts
     window.ethereum.on('accountsChanged', async () => {
-      console.log("testing")
       await loadAccount(dispatch)
     })
 
     // Fetch Tokens
     await loadTokens(provider, chainId, dispatch)
-
-    // Fetch amm
     await loadAMM(provider, chainId, dispatch)
   }
 
@@ -62,7 +57,7 @@ function App() {
         <hr />
 
         <Tabs />
-        
+
         <Routes>
           <Route exact path="/" element={<Swap />} />
           <Route path="/deposit" element={<Deposit />} />

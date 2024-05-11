@@ -6,7 +6,7 @@ import AMM_ABI from '../abis/AMM.json'
 import config from '../config.json'
 
 import { setContracts, setSymbols, balancesLoaded } from './reducer/tokens'
-import { setContract, sharesLoaded } from './reducer/amm'
+import { setContract, sharesLoaded, swapRequest, swapSuccess, swapFail } from './reducer/amm'
 
 export const loadProvider = (dispatch) => {
 	// Initiate provider
@@ -36,7 +36,6 @@ export const loadTokens = async (provider, chainId, dispatch) => {
 	const dapp = new ethers.Contract(config[chainId].dapp.address, TOKEN_ABI, provider)
 	const usd = new ethers.Contract(config[chainId].usd.address, TOKEN_ABI, provider)
 
-	//console.log(`testing : ${config[chainId].usd.address}`)
 	dispatch(setContracts([dapp, usd]))
 	dispatch(setSymbols([await dapp.symbol(), await usd.symbol()]))
 }
@@ -62,3 +61,38 @@ export const loadBalances = async (amm, tokens, account, dispatch) => {
 	const shares = await amm.shares(account)
 	dispatch(sharesLoaded(ethers.utils.formatUnits(shares.toString(), 'ether')))
 }
+
+// SWAP
+
+export const swap = async (provider, amm, token, symbol, amount, dispatch) => {
+	
+	try{
+		// Tell Redux that the use is swapping
+		dispatch(swapRequest())
+
+		let transaction
+
+		const signer = await provider.getSigner()
+
+		transaction = await token.connect(signer).approve(amm.address, amount)
+		await transaction.wait()
+
+		if(symbol === 'DAPP'){
+			transaction = await amm.connect(signer).swapToken1(amount)
+			await transaction.wait()
+		} else {
+			transaction = await amm.connect(signer).swapToken2(amount)
+		}
+
+		await transaction.wait()
+
+		// Tell Redux that swap has completed
+		dispatch(swapSuccess(transaction.hash))
+	}catch(error){
+		dispatch(swapFail())
+	}
+
+	
+
+}
+

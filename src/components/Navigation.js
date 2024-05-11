@@ -13,10 +13,9 @@ const Navigation = () => {
   const chainId = useSelector(state => state.provider.chainId)
   const account = useSelector(state => state.provider.account)
   const tokens = useSelector(state => state.tokens.contracts)
-  const amm = useSelector(state => state.amm.shares)
+  const amm = useSelector(state => state.amm.contract)
 
   const dispatch = useDispatch()
-
   const connectHandler = async () => {
    const account = await loadAccount(dispatch)
    await loadBalances(amm, tokens, account, dispatch)
