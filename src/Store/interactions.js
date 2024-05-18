@@ -6,7 +6,18 @@ import AMM_ABI from '../abis/AMM.json'
 import config from '../config.json'
 
 import { setContracts, setSymbols, balancesLoaded } from './reducer/tokens'
-import { setContract, sharesLoaded, swapRequest, swapSuccess, swapFail } from './reducer/amm'
+import { setContract, 
+		 sharesLoaded, 
+		 swapRequest, 
+		 swapSuccess, 
+		 swapFail, 
+		 depositRequest, 
+		 depositSuccess, 
+		 depositFail,
+	     withdrawRequest,
+	     withdrawSuccess,
+	     withdrawFail 
+		} from './reducer/amm'
 
 export const loadProvider = (dispatch) => {
 	// Initiate provider
@@ -62,6 +73,56 @@ export const loadBalances = async (amm, tokens, account, dispatch) => {
 	dispatch(sharesLoaded(ethers.utils.formatUnits(shares.toString(), 'ether')))
 }
 
+// Add Liquidity
+
+export const addLiquidity = async (provider, amm, tokens, amounts, dispatch) => {
+	try{
+		dispatch(depositRequest())
+
+		const signer = await provider.getSigner()
+
+		let transaction
+
+		//console.log('token 1: ',amounts[0].toString())
+		//console.log('token 2: ',amounts[1].toString())
+
+		transaction = await tokens[0].connect(signer).approve(amm.address, amounts[0])
+		await transaction.wait()
+
+		transaction = await tokens[1].connect(signer).approve(amm.address, amounts[1])
+		await transaction.wait()
+
+		transaction = await amm.connect(signer).addLiquidity(amounts[0], amounts[1])
+		await transaction.wait()
+
+		dispatch(depositSuccess(transaction.hash))
+	} catch(error) {
+		console.log(`Error ${error}`)
+		dispatch(depositFail())
+	}
+}
+// Remove Liquidity
+
+export const removeLiquidity = async (provider, amm, shares, dispatch) => {
+	try{
+		dispatch(withdrawRequest())
+
+		const signer = await provider.getSigner()
+
+		let transaction = await amm.connect(signer).removeLiquidity(shares)
+		await transaction.wait()
+
+		dispatch(withdrawSuccess(transaction.hash))
+	} catch(error) {
+		dispatch(withdrawFail())
+	}
+}
+
+// Load Shares
+
+export const loadShares = async () => {
+
+}
 // SWAP
 
 export const swap = async (provider, amm, token, symbol, amount, dispatch) => {
@@ -91,8 +152,5 @@ export const swap = async (provider, amm, token, symbol, amount, dispatch) => {
 	}catch(error){
 		dispatch(swapFail())
 	}
-
-	
-
 }
 

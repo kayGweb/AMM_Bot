@@ -13,7 +13,6 @@ import { ethers } from 'ethers'
 import Alert from './Alert'
 import { swap, loadBalances } from '../Store/interactions'
 
-
 const Swap = () => {
 	// State Varibles
 	const [inputToken, setInputToken] = useState(null)
