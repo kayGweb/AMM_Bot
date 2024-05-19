@@ -3,7 +3,6 @@ import Navbar from 'react-bootstrap/Navbar'
 import Form from 'react-bootstrap/Form'
 import Blockies from 'react-blockies'
 import Button from 'react-bootstrap/Button'
-
 import logo from '../logo.png'
 import config from '../config.json'
 

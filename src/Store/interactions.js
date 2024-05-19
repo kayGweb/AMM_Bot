@@ -16,7 +16,8 @@ import { setContract,
 		 depositFail,
 	     withdrawRequest,
 	     withdrawSuccess,
-	     withdrawFail 
+	     withdrawFail,
+	     swapsLoaded
 		} from './reducer/amm'
 
 export const loadProvider = (dispatch) => {
@@ -153,4 +154,19 @@ export const swap = async (provider, amm, token, symbol, amount, dispatch) => {
 		dispatch(swapFail())
 	}
 }
+
+// Load All Swaps
+export const loadAllSwaps = async (provider, amm, dispatch) => {
+
+	const block = await provider.getBlockNumber()
+
+	const swapStream = await amm.queryFilter('Swap', 0, block)
+
+	const swaps = swapStream.map(event => {
+		return { hash: event.transactionHash, args: event.args }
+	})
+
+	dispatch(swapsLoaded(swaps))
+	console.log(swaps)
+} 
 
